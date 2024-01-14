@@ -81,7 +81,7 @@ int main(int argc, char const *argv[])
         fseek(file, 1 - WINDOW_SIZE, SEEK_CUR);
     } 
     
-    dumpMatrixToBMP(m, ".\\noises\\pdf1.bmp");
+    dumpMatrixToBMP(m, ".\\noises\\ogg1.bmp");
 
     // dumpMatrix(m);
     deleteMatrix(m);
