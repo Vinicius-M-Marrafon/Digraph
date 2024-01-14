@@ -12,7 +12,7 @@ Matrix *newMatrix(size_t lines, size_t columns)
         return NULL;
     }
 
-    matrix->matrix = (byte *)calloc((lines * columns), sizeof(byte));
+    matrix->matrix = (uint32_t *)calloc((lines * columns), sizeof(uint32_t));
     if (matrix->matrix == NULL) {
         fprintf(stderr, "[MATRIX - newMatrix]: \"Matrix->matrix\" Allocation Failure\n");
         return NULL;
@@ -24,7 +24,7 @@ Matrix *newMatrix(size_t lines, size_t columns)
     return matrix;
 }
 
-void setValueAt(Matrix *m, size_t line, size_t column, byte value)
+void setValueAt(Matrix *m, size_t line, size_t column, uint32_t value)
 {
     if (m != NULL) {
         if (line > m->lines - 1) {
@@ -52,7 +52,7 @@ void setValueAt(Matrix *m, size_t line, size_t column, byte value)
     }
 }
 
-byte getValueAt(Matrix *m, size_t line, size_t column)
+uint32_t getValueAt(Matrix *m, size_t line, size_t column)
 {
     if (m != NULL) {
         if (line > m->lines - 1) {
@@ -98,5 +98,35 @@ void dumpMatrix(Matrix *m)
     }
     else {
         fprintf(stderr, "[MATRIX - dumpMatrix](ERROR): Matrix Object == NULL!\n");
+    }
+}
+
+uint32_t getMaxValue(Matrix *m)
+{
+    uint32_t max = 0;
+    for (uint32_t i = 0; i < m->lines; i++) {
+        for (uint32_t j = 0; j < m->columns; j++) {
+            if (getValueAt(m, i, j) > max) max = getValueAt(m, i, j);
+        }
+    }
+
+    return max;
+}
+
+void incrementValueAt(Matrix *m, size_t line, size_t column)
+{
+    if (m != NULL) {
+        if (line > m->lines - 1) {
+            fprintf(stderr, "[MATRIX - incrementValueAt]: line out of bound!\n");
+        } 
+
+        if (column > m->columns - 1) {
+            fprintf(stderr, "[MATRIX - incrementValueAt]: column out of bound!\n");
+        }
+
+        m->matrix[(m->lines * line) + column]++;
+    }
+    else {
+        fprintf(stderr, "[MATRIX - incrementValueAt](ERROR): Matrix Object == NULL!\n");
     }
 }

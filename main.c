@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include ".\headers\matrix.h"
 #include ".\headers\bmp.h"
 
@@ -8,7 +9,7 @@
 void dumpMatrixToBMP(Matrix *m, char *path)
 {
     INFO_HEADER info = {
-        .bpp = 24,
+        .bpp = 24,                  // RGB
         .color_counter = 0,
         .color_plane = 0,
         .color_table = 1,
@@ -34,17 +35,19 @@ void dumpMatrixToBMP(Matrix *m, char *path)
     fwrite(&file, sizeof (FILE_HEADER), 1, outfile);
     fwrite(&info, sizeof (INFO_HEADER), 1, outfile);
 
+    float max = logf(getMaxValue(m));
+    printf("M - MAX VALUE = %f\n", max);
     for (unsigned int i = 0; i < 256; i++) {
         for (unsigned int j = 0; j < 256; j++) {
-            if (getValueAt(m, i, j) != 0) {
-                RGB white = { .blue = 0xff, .green = 0xff, .red = 0xff };
-                // RGB white = { .blue = 0x00, .green = 0xff, .red = 0x00 };
-                fwrite(&white, sizeof (RGB), 1, outfile); 
-            }
-            else {
-                RGB white = { .blue = 0x00, .green = 0x00, .red = 0x00 };
-                fwrite(&white, sizeof (RGB), 1, outfile);
-            }
+            float brightness = logf(getValueAt(m, i, j))/ max;
+            RGB white = { 
+                .blue = 0x00, 
+                .green = brightness * 0xFF,
+                .red = 0x00
+            };
+
+            // RGB white = { .blue = 0x00, .green = 0xff, .red = 0x00 };
+            fwrite(&white, sizeof (RGB), 1, outfile); 
         }
     }
 
@@ -66,15 +69,19 @@ int main(int argc, char const *argv[])
     }
     
     Matrix *m = newMatrix(256, 256);
-    byte pair[2];
+    unsigned char pair[2];
     
     while (fread(&pair, sizeof (pair), 1, file)) {
         // printf("PAIR (%u, %u)\n", pair[0], pair[1]);
-        setValueAt(m, pair[0], pair[1], 32);
+        // setValueAt(m, pair[0], pair[1], 32);
+        
+        // Frequency matrix
+        incrementValueAt(m, pair[0], pair[1]);
+
         fseek(file, 1 - WINDOW_SIZE, SEEK_CUR);
     } 
     
-    dumpMatrixToBMP(m, ".\\noises\\exe1.bmp");
+    dumpMatrixToBMP(m, ".\\noises\\pdf1.bmp");
 
     // dumpMatrix(m);
     deleteMatrix(m);
