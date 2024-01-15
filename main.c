@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include ".\headers\matrix.h"
 #include ".\headers\bmp.h"
 
+#define PI 3.14159265
+#define MATRIX_SIZE 256
 #define WINDOW_SIZE 2
 
 void dumpMatrixToBMP(Matrix *m, const char *path)
@@ -39,8 +42,8 @@ void dumpMatrixToBMP(Matrix *m, const char *path)
     float max = logf(getMaxValue(m));
     printf("M - MAX VALUE = %f\n", max);
 
-    for (unsigned int i = 0; i < 256; i++) {
-        for (unsigned int j = 0; j < 256; j++) {
+    for (unsigned int i = 0; i < MATRIX_SIZE; i++) {
+        for (unsigned int j = 0; j < MATRIX_SIZE; j++) {
             float brightness = logf(getValueAt(m, i, j))/ max;
             RGB white = { 
                 .blue = 0x00, 
@@ -70,7 +73,7 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
     
-    Matrix *m = newMatrix(256, 256);
+    Matrix *m = newMatrix(MATRIX_SIZE, MATRIX_SIZE);
     unsigned char pair[2];
     
     while (fread(&pair, sizeof (pair), 1, file)) {
@@ -78,7 +81,22 @@ int main(int argc, char const *argv[])
         // setValueAt(m, pair[0], pair[1], 32);
         
         // Frequency matrix
-        incrementValueAt(m, pair[0], pair[1]);
+
+        // Cartesion coordinates
+        // incrementValueAt(m, pair[0], pair[1]);
+
+        // Polar coordinates
+        float r = (pair[0] - 127);
+        float theta = ((1.4 * pair[1]) * PI/ 180.0);
+
+        // printf("R=%.2f; 0=%.2f", r, theta);
+
+        int x = 128 - (int)(r * cosf(theta));
+        int y = 128 - (int)(r * sinf(theta));
+
+        // printf(" | X=%d; Y=%d\n", x, y);
+
+        incrementValueAt(m, y, x);
 
         fseek(file, 1 - WINDOW_SIZE, SEEK_CUR);
     } 
