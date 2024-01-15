@@ -6,7 +6,7 @@
 
 #define WINDOW_SIZE 2
 
-void dumpMatrixToBMP(Matrix *m, char *path)
+void dumpMatrixToBMP(Matrix *m, const char *path)
 {
     INFO_HEADER info = {
         .bpp = 24,                  // RGB
@@ -35,8 +35,10 @@ void dumpMatrixToBMP(Matrix *m, char *path)
     fwrite(&file, sizeof (FILE_HEADER), 1, outfile);
     fwrite(&info, sizeof (INFO_HEADER), 1, outfile);
 
+    // Logarithmic scale
     float max = logf(getMaxValue(m));
     printf("M - MAX VALUE = %f\n", max);
+
     for (unsigned int i = 0; i < 256; i++) {
         for (unsigned int j = 0; j < 256; j++) {
             float brightness = logf(getValueAt(m, i, j))/ max;
@@ -57,8 +59,8 @@ void dumpMatrixToBMP(Matrix *m, char *path)
 
 int main(int argc, char const *argv[])
 {
-    if (argc != 2) {
-        fprintf(stderr, "[MAIN](Usage) %s -{infile}-\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "[MAIN](Usage) %s -{infile}- -{outfile}\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -81,7 +83,7 @@ int main(int argc, char const *argv[])
         fseek(file, 1 - WINDOW_SIZE, SEEK_CUR);
     } 
     
-    dumpMatrixToBMP(m, ".\\noises\\ogg1.bmp");
+    dumpMatrixToBMP(m, argv[2]);
 
     // dumpMatrix(m);
     deleteMatrix(m);
