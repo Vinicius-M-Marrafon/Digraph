@@ -9,10 +9,14 @@
 #define MATRIX_SIZE 256
 #define WINDOW_SIZE 2
 
+// Polar coordinate
+#define X_ORIGIN 128
+#define Y_ORIGIN 128
+
 void dumpMatrixToBMP(Matrix *m, const char *path)
 {
     INFO_HEADER info = {
-        .bpp = 24,                  // RGB
+        .bpp = 24,
         .color_counter = 0,
         .color_plane = 0,
         .color_table = 1,
@@ -42,13 +46,19 @@ void dumpMatrixToBMP(Matrix *m, const char *path)
     float max = logf(getMaxValue(m));
     printf("M - MAX VALUE = %f\n", max);
 
-    for (unsigned int i = 0; i < MATRIX_SIZE; i++) {
+    for (int i = MATRIX_SIZE - 1; i >= 0; --i) {
         for (unsigned int j = 0; j < MATRIX_SIZE; j++) {
-            float brightness = logf(getValueAt(m, i, j))/ max;
+            float brightness = 0.00;
+            uint32_t freq = getValueAt(m, i, j);
+
+            if (freq > 0) {
+                brightness = logf(getValueAt(m, i, j))/ max;
+            }
+
             RGB white = { 
-                .blue = 0x00, 
+                .blue = brightness * 0xFF, 
                 .green = brightness * 0xFF,
-                .red = 0x00
+                .red = brightness * 0xFF
             };
 
             // RGB white = { .blue = 0x00, .green = 0xff, .red = 0x00 };
@@ -83,20 +93,19 @@ int main(int argc, char const *argv[])
         // Frequency matrix
 
         // Cartesion coordinates
-        // incrementValueAt(m, pair[0], pair[1]);
+        incrementValueAt(m, pair[0], pair[1]);
 
         // Polar coordinates
-        float r = (pair[0] - 127);
-        float theta = ((1.4 * pair[1]) * PI/ 180.0);
+        /*
+        float r = pair[0] - 127;
 
-        // printf("R=%.2f; 0=%.2f", r, theta);
+        float theta = ((1.40625 * pair[1]) * PI/ 180.0);
 
-        int x = 128 - (int)(r * cosf(theta));
-        int y = 128 - (int)(r * sinf(theta));
-
-        // printf(" | X=%d; Y=%d\n", x, y);
+        int x = X_ORIGIN - (int)(r * cosf(theta));
+        int y = Y_ORIGIN - (int)(r * sinf(theta));
 
         incrementValueAt(m, y, x);
+        */
 
         fseek(file, 1 - WINDOW_SIZE, SEEK_CUR);
     } 
