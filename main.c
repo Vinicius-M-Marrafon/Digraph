@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include ".\headers\matrix.h"
 #include ".\headers\bmp.h"
@@ -48,21 +49,33 @@ void dumpMatrixToBMP(Matrix *m, const char *path)
 
     for (int i = MATRIX_SIZE - 1; i >= 0; --i) {
         for (unsigned int j = 0; j < MATRIX_SIZE; j++) {
-            float brightness = 0.00;
+            float scale = 0.00;
             uint32_t freq = getValueAt(m, i, j);
 
             if (freq > 0) {
-                brightness = logf(getValueAt(m, i, j))/ max;
+                scale = logf(getValueAt(m, i, j))/ max;
             }
 
-            RGB white = { 
+            /* Gray Scale (brightness)
+            RGB pixel = { 
                 .blue = brightness * 0xFF, 
                 .green = brightness * 0xFF,
                 .red = brightness * 0xFF
             };
+            */
+
+            /* Temperature Scale */
+            int temp = 8 * scale;
+            // Color scale
+            int color = (0x1FE8F2 << temp);
+
+            // Grayscale
+            // BYTE pixel[] = { scale * 0xFF, scale * 0xFF, scale * 0xFF };
+            RGB pixel;
+            memcpy(&pixel, &color, sizeof (RGB));
 
             // RGB white = { .blue = 0x00, .green = 0xff, .red = 0x00 };
-            fwrite(&white, sizeof (RGB), 1, outfile); 
+            fwrite(&pixel, sizeof (RGB), 1, outfile); 
         }
     }
 
